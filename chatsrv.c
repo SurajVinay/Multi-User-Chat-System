@@ -64,8 +64,6 @@ void shutdown_server(int sig);
 int get_client_info_idx_by_sockfd(int sockfd);
 int get_client_info_idx_by_nickname(char *nickname);
 void display_help_page(void);
-void display_version_info(void);
-void show_gnu_banner(void);
 
 
 /*
@@ -87,11 +85,7 @@ int main(int argc, char *argv[])
 		display_help_page();
 		exit(0);
 	}
-	if (params->version)
-	{
-		display_version_info();
-		exit(0);
-	}
+
 	if (ret < 0)
 	{
 		if (ret == -2)
@@ -115,9 +109,6 @@ int main(int argc, char *argv[])
 	signal(SIGINT, shutdown_server);
 	signal(SIGTERM, shutdown_server);
 	
-	/* Show banner and stuff */
-	show_gnu_banner();	
-
 	/* Startup the server listener */
 	if (startup_server() < 0)
 	{
@@ -785,7 +776,6 @@ void shutdown_server(int sig)
  */
 void display_help_page(void)
 {
-	show_gnu_banner();
 	printf("\n");
 	printf("Syntax:\n");
 	printf("-------\n");
@@ -805,45 +795,11 @@ void display_help_page(void)
 	printf("                                             1 = ERROR (Log errors only)\n");
 	printf("                                             2 = INFO (Log additional information)\n");
 	printf("                                             3 = DEBUG (Log debug level information)\n");
-	printf("--version, -v                              Displays version information.\n");
 	printf("--help, -h                                 Displays this help page.\n");
-	printf("\n");
-    printf("Bug Reports and Other Comments:\n");
-    printf("-------------------------------\n");
-    printf("I'm glad to receive comments and bug reports on this tool. You can best reach me\n");
-    printf("by email or IM using Jabber:\n\n");
-    printf("+ E-Mail:     andre.gasser@gmx.ch\n");
-    printf("+ Jabber:     sh0ka@jabber.ccc.de\n");
-    printf("\n");
-    printf("Source Code:\n");
-    printf("------------\n");
-    printf("Fetch the latest version from:\n");
-    printf("+ GitHub:     https://github.com/shoka/chatsrv\n\n");
+
 }
 
 
-/* 
- * Display version information.
- */
-void display_version_info(void)
-{
-	printf("%s %s\n", APP_NAME, APP_VERSION);
-	//printf("Copyright (C) 2012 André Gasser\n");
-	//printf("License GPLv3: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
-	//printf("This is free software: you are free to change and redistribute it.\n");
-	//printf("There is NO WARRANTY, to the extent permitted by law.\n");
-}
 
-
-/*
- * Display a short GNU banner.
- */
-void show_gnu_banner(void)
-{
-	printf("%s %s  ", APP_NAME, APP_VERSION);
-    //printf("This program comes with ABSOLUTELY NO WARRANTY.\n");
-    //printf("This is free software, and you are welcome to redistribute it\n");
-    //printf("under certain conditions.\n");
-}
 
 
