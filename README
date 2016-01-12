@@ -1,0 +1,231 @@
+
+It describes CHATSRV, a tool which serves as a multi-threaded
+chat server written in C. 
+
+
+--[ Contents ]----------------------------------------------------------
+
+1 - Introduction
+
+2 - The Tool
+  2.1 - Features
+  2.2 - Usage
+    2.2.1 - Command-line Arguments
+	2.2.2 - Starting the Chat Server
+	2.2.3 - Connecting to the Chat Server
+	2.2.4 - Disconnecting from the Chat Server
+    2.2.5 - Shutting Down the Chat Server
+    2.2.6 - Redirecting the Server Console Output to a File
+  2.3 - Supported Chat Commands
+  2.4 - Building from Source
+
+
+
+--[ 1 - Introduction ]--------------------------------------------------
+
+CHATSRV serves as an example of a chat server implemented in C. In order
+to use the chat server, clients connect to it by using a simple telnet
+client, such as linux or windows telnet or putty.
+
+This tool was built as part of a seminar paper worked on at school.
+
+--[ 2 - The Tool ]------------------------------------------------------
+
+----[ 2.1 - Features ]--------------------------------------------------
+
+The CHATSRV offers the following features:
+
+  + Multi-Threading:
+    CHATSRV is implemented as a multi-threaded chat server. For each 
+    incoming client connection, a new thread will be created, which
+    handles incoming messages from clients. 
+  
+  + Command-Line Parameters
+    Pass command-line parameters to the server to configure its 
+    behaviour in more detail. Parsing of command-line parameters is done
+    by using the GNU getopt library.
+  
+  + Advanced Logging
+    CHATSRV uses a special logging mechanism, which allows to print log
+    messages on the server console using different log levels. Supported
+    log levels include ERROR, INFO and DEBUG. Each log message includes
+    a detailled timestamp.
+  
+  + Fast Reuse of Sockets
+    After shutting down CHATSRV, its TCP connection is held in a 
+    TIME_WAIT state for a certain amount of time (depends on OS). This 
+    can become unhandy if the server shall be restarted and the service 
+    interruption shall be kept at a minimum. Therefore, CHATSRV 
+    implements a special behaviour, which allows for faster reuse of a 
+    previously used TCP port to bring the server back online very fast.
+  
+  + Graceful Server Shutdown Using Signals
+    CHATSRV implements signal handling capabilities which allow a
+    server administrator to perform a graceful shutdown. After receiving
+    either the SIGINT or the SIGTERM signal, CHATSRV cleans up allocated
+    memory, closes socket connections and terminates running threats. 
+    Then it terminates itself and returns to the shell.
+
+  + ANSI Color Support
+    To better distinguish between each others messages. Uses various of
+    colors to improve display of messages.
+
+  + Joiner / Leaver Notification
+    If a user joins or leaves the chat server, all other users will be
+    notified.
+    
+  + Support for Nickname Change
+    Users can change their nicknames during a chat session. All other
+    users will be notified about this change.
+    
+  + Duplicate Nickname Detection
+    Recognizes if other chat buddies already use the desired nickname.
+    The user is notified about that and asked to choose another name.  
+    
+  + Private Messages
+    Users can send private messages to each others. Private messages
+    are only visible to the sender and the receiver.
+  
+
+----[ 2.2 - Usage ]-----------------------------------------------------
+
+This chapter explains basic usage of CHATSRV.
+
+
+----[ 2.2.1 - Command-line Arguments ]----------------------------------
+
+The following command-line arguments are supported:
+
+--ip=<ip address>, -i <ip address>
+	
+	Specifies the ip address which shall be used by CHATSRV. If no ip
+	address is specified, 127.0.0.1 will be used by default.
+
+--port=<port number>, -p <port number>
+
+    Specifies the TCP port to be used by CHATSRV. If no port is
+    specified, port 5555 will be used by default.
+
+--loglevel=<level>, -l <level>         
+
+    Specifies the desired log level. The following levels are supported:
+        1 = ERROR (Log errors only)
+        2 = INFO (Log additional information)
+        3 = DEBUG (Log debug level information)
+        
+    If no log level is specified, INFO will be used by default.
+
+--version, -v
+
+    Displays version information.
+
+--help, -h 
+
+    Display help page.
+
+
+----[ 2.2.2 - Starting the Chat Server ]--------------------------------
+
+Usage of this tool is quite simple. Do start the chat server, simply 
+issue the following command on the shell:
+
+$ ./chatsrv
+
+This starts CHATSRV using its default configuration. Use the following
+command, if you would like to specify ip address and port:
+
+$ ./chatsrv --ip=192.168.1.1 --port=8888
+
+This starts CHATSRV on ip address 192.168.1.1, listening on port 8888.
+
+
+----[ 2.2.3 - Connecting to the Chat Server ]---------------------------
+
+In order to be able to chat with others, you must connect to CHATSRV
+first. to do this, you'll only need a simple telnet client:
+
+$ telnet 192.168.1.1 5555
+
+This connects you to the chat server running on 192.168.1.1, port 5555.
+You can now start entering your messages. Your messages will be
+broadcasted to all other logged in users on this chat server.
+
+
+----[ 2.2.4 - Disconnecting from the Chat Server ]----------------------
+
+To disconnect from the chat server, use the /quit command. See 2.3 for
+a detailed list of supported chat commands.
+
+
+----[ 2.2.5 - Shutting Down the Chat Server ]---------------------------
+
+The proper way to shutdown the chat server is either by entering
+Ctrl + C on the console screen of the running CHATSRV program or by
+sending a SIGINT or SIGTERM signal to the CHATSRV process by using the
+kill command as an example:
+
+$ ./kill -s SIGTERM 4344
+
+This sends the SIGTERM to the process running using a PID of 4344. 
+
+
+----[ 2.2.6 - Redirecting the Server Console Output to a File ]---------
+
+If you like to keep your chat logs, just redirect the server console
+output to a text file by starting CHATSRV using the following commands:
+
+$ ./chatsrv -l 3 | tee chatsrv.log
+
+
+----[ 2.3 - Supported Chat Commands ]-----------------------------------
+
+The chat server recognizes the following commands from clients:
+
+/nick <nickname>
+
+    Allows the user to change his nickname to <nickname>. Plese note,
+    that, for security reasons, only letters a-z, A-Z and numbers 0-9
+    are allowed to build a nickname.
+
+/msg <nickname> <message>
+
+    Sends a private message <message> to user <nickname>.
+
+/me <message>
+
+    Use this to say something about yourself. /me will be replated
+    with your own nickname.
+    
+/quit
+
+    Disconnects the user from the chat server.
+
+
+----[ 2.4 - Building from Source ]--------------------------------------
+
+Before you can build the tool from source, your system must meet some
+preconditions. Currently they are:
+
+  + gcc must be installed.
+  + make must be installed.
+
+The source distribution can be built from source by conducting the
+following steps on your box:
+
+  1. Copy the file chatsrv-<version>.tar.gz to your linux box. Make
+     sure, it is located in a dedicated directory, since extraction
+	 will put the files directly in there.
+
+  2. Extract the tarball using:
+
+     $ tar xvf chatsrv-<version>.tar.gz
+
+  3. Compile the source code using:
+
+     $ make
+
+	 Optionally, you can compile it in debug mode in order to add debug
+	 information to the resulting binary. You'll need that only if you
+	 like to debug using gdb. To create a debug binary invoke:
+
+     $ make DEBUG=1
